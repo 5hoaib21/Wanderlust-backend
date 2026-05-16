@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 dotenv.config();
 
 const uri = process.env.MONGODB_URI;
@@ -9,8 +9,8 @@ const uri = process.env.MONGODB_URI;
 const app = express();
 const PORT = process.env.PORT;
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -27,12 +27,48 @@ async function run() {
     const db = client.db("wanderlust");
     const destinationCollection = db.collection("destinations");
 
+    app.get("/destination", async (req, res) => {
+      const result = await destinationCollection.find().toArray();
+      res.json(result);
+    });
+
     app.post("/destination", async (req, res) => {
       const destinationData = req.body;
       console.log(destinationData);
       const result = await destinationCollection.insertOne(destinationData);
       res.json(result);
     });
+
+    app.get("/destination/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const result = await 
+      destinationCollection.findOne
+      ({_id: new ObjectId(id)});
+
+      res.json(result)
+    });
+
+
+    app.put("/destination/:id", async (req, res) => {
+            const { id } = req.params;
+            const updatedData = req.body;
+            console.log(updatedData, 'updatedData');
+
+            const result = await destinationCollection.updateOne(
+              {_id: new ObjectId(id)},
+              {$set: updatedData}
+            )
+            res.json(result)
+    })
+
+    app.delete("/destination/:id", async (req, res) => {
+             const { id } = req.params;
+             const result = await destinationCollection.deleteOne(
+              {_id: new ObjectId(id)})
+              res.json(result)
+    })
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
