@@ -26,6 +26,7 @@ async function run() {
 
     const db = client.db("wanderlust");
     const destinationCollection = db.collection("destinations");
+    const bookingsCollection = db.collection("bookings");
 
     app.get("/destination", async (req, res) => {
       const result = await destinationCollection.find().toArray();
@@ -42,33 +43,40 @@ async function run() {
     app.get("/destination/:id", async (req, res) => {
       const { id } = req.params;
 
-      const result = await 
-      destinationCollection.findOne
-      ({_id: new ObjectId(id)});
+      const result = await destinationCollection.findOne({
+        _id: new ObjectId(id),
+      });
 
-      res.json(result)
+      res.json(result);
     });
 
-
     app.put("/destination/:id", async (req, res) => {
-            const { id } = req.params;
-            const updatedData = req.body;
-            console.log(updatedData, 'updatedData');
+      const { id } = req.params;
+      const updatedData = req.body;
+      console.log(updatedData, "updatedData");
 
-            const result = await destinationCollection.updateOne(
-              {_id: new ObjectId(id)},
-              {$set: updatedData}
-            )
-            res.json(result)
-    })
+      const result = await destinationCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedData },
+      );
+      res.json(result);
+    });
 
     app.delete("/destination/:id", async (req, res) => {
-             const { id } = req.params;
-             const result = await destinationCollection.deleteOne(
-              {_id: new ObjectId(id)})
-              res.json(result)
-    })
+      const { id } = req.params;
+      const result = await destinationCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.json(result);
+    });
 
+    app.post("/booking", async (req, res) => {
+      const bookingData = req.body;
+  
+      const result = await bookingsCollection.insertOne(bookingData)
+
+      res.json(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log(
